@@ -16,6 +16,8 @@ const SIGNUP = async (req, res) => {
 
         const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '15m' });
         const refreshToken = jwt.sign({ userId: user._id }, process.env.JWT_REFRESH_SECRET, { expiresIn: '7d' });
+        req.session.token = token;
+        req.session.refreshToken = refreshToken;
 
         res.cookie('refreshToken', refreshToken, {
             httpOnly: true,
@@ -54,6 +56,8 @@ const LOGIN = async (req, res) => {
 
         const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '15m' });
         const refreshToken = jwt.sign({ userId: user._id }, process.env.JWT_REFRESH_SECRET, { expiresIn: '7d' });
+        req.session.token = token;
+        req.session.refreshToken = refreshToken
 
         res.cookie('refreshToken', refreshToken, {
             httpOnly: true,

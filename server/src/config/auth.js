@@ -1,15 +1,28 @@
 var GoogleStrategy = require('passport-google-oauth20').Strategy;
 let passport = require("passport")
+const User = require("../models/user.model")
 passport.use(new GoogleStrategy({
     clientID: process.env.GOOGLEID,
     clientSecret: process.env.GOOGLESEC,
     callbackURL: "http://localhost:8080/user/auth/google/callback"
 },
-    function (accessToken, refreshToken, profile, cb) {
-        // User.findOrCreate({ googleId: profile.id }, function (err, user) {
+    async function (accessToken, refreshToken, profile, cb) {
+
+        try {
+            let user = await User.find({ email: profile._json.email })
+            if (!user) {
+                user = await User.create({ username: profile.displayName, email: profile._json.email })
+            }
+
+            return cb(null, user)
+        } catch (error) {
+            console.log(error)
+            return cb(error);
+        }
+        // User.create({ username: profile.displayName, email: profile._json.email }, function (err, user) {
         //     return cb(err, user);
         // });
-        console.log(profile)
+
     }
 ));
 
