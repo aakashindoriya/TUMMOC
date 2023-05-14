@@ -5,19 +5,33 @@ const argon2 = require("argon2")
 
 const SIGNUP = async (req, res) => {
     const { username, email, password } = req.body;
+
     try {
-        let user = await User.findOne({ email });
-        if (user) {
-            return res.status(400).send({ error: 'User already exists' });
-        }
         const hashedPassword = await argon2.hash(password);
-        user = await User.create({ username, email, password: hashedPassword });
-        const token = jwt.sign({ email, username, _id: user._id }, process.env.JWT_SECRET);
-        res.status(201).send({ email, username, _id: user._id, token });
-    } catch (err) {
-        res.status(500).send(err.message);
+
+        const user = new User({ username, email, password: hashedPassword });
+        await user.save();
+
+        req.session.userId = user._id;
+
+        const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '15m' });
+        const refreshToken = jwt.sign({ userId: user._id }, process.env.JWT_REFRESH_SECRET, { expiresIn: '7d' });
+
+        res.cookie('refreshToken', refreshToken, {
+            httpOnly: true,
+            maxAge: 7 * 24 * 60 * 60 * 1000,
+        });
+        res.cookie('token', token, {
+            httpOnly: true,
+            maxAge: 15 * 60 * 1000,
+        });
+
+        res.status(201).json({ token });
+    } catch (error) {
+        res.status(400).json({ error: error.message });
     }
-}
+};
+
 
 
 const LOGIN = async (req, res) => {
@@ -25,20 +39,46 @@ const LOGIN = async (req, res) => {
 
     try {
         const user = await User.findOne({ email });
+
         if (!user) {
-            return res.status(401).send('Invalid credentials');
+            return res.status(404).send('Invalid email or password');
         }
-        const isMatch = await argon2.verify(user.password, password);
-        if (!isMatch) {
-            return res.status(401).send('Invalid credentials');
+
+        const isPasswordValid = await argon2.verify(user.password, password);
+
+        if (!isPasswordValid) {
+            return res.status(404).send('Invalid email or password');
         }
-        const { username, _id } = user
-        const token = jwt.sign({ email, username, _id }, process.env.JWT_SECRET);
-        res.status(201).send({ email, username, _id, token });
-    } catch (err) {
-        console.error(err);
-        res.status(500).send(err.message);
+
+        req.session.userId = user._id;
+
+        const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '15m' });
+        const refreshToken = jwt.sign({ userId: user._id }, process.env.JWT_REFRESH_SECRET, { expiresIn: '7d' });
+
+        res.cookie('refreshToken', refreshToken, {
+            httpOnly: true,
+            maxAge: 7 * 24 * 60 * 60 * 1000,
+        });
+        res.cookie('token', token, {
+            httpOnly: true,
+            maxAge: 15 * 60 * 1000,
+        });
+
+        res.status(200).json({ token });
+    } catch (error) {
+        res.status(400).json({ error: error.message });
     }
 }
 
-module.exports = { SIGNUP, LOGIN }
+const LOGOUT = (req, res) => {
+    req.session.destroy((err) => {
+        if (err) {
+            console.log(err);
+            return res.status(500).json({ error: 'Internal server error' });
+        }
+        res.clearCookie('refreshToken');
+        res.clearCookie('token');
+        res.status(200).json({ message: 'Logged out successfully' });
+    });
+};
+module.exports = { SIGNUP, LOGIN, LOGOUT }
