@@ -7,8 +7,9 @@ const cookieParser = require('cookie-parser');
 const app = express()
 const userRoute = require("./routes/user.route")
 app.use(cors(
+
     {
-        origin: ['http://localhost:3000', 'https://tummoc-snowy.vercel.app'],
+        origin: ['http://localhost:3000', 'https://tummoc-aakashindoriya.vercel.app'],
         credentials: true,
     }
 ))
