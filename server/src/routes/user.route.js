@@ -1,5 +1,5 @@
 const express = require("express")
-const { SIGNUP, LOGIN, LOGOUT } = require("../controllers/user.controller")
+const { SIGNUP, LOGIN, LOGOUT, USERDATA } = require("../controllers/user.controller")
 const jwt = require("jsonwebtoken")
 const passport = require("../config/auth")
 const app = express.Router()
@@ -7,6 +7,7 @@ const app = express.Router()
 app.post("/signup", SIGNUP)
 app.post("/login", LOGIN)
 app.delete("/logout", LOGOUT)
+app.get("/userdata", USERDATA)
 app.get('/auth/google',
     passport.authenticate('google', { scope: ['profile', "email"] }));
 

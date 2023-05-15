@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const User = require('../models/userModel');
+const Dustbin = require('../models/dustbin.model');
 
 const authMiddleware = async (req, res, next) => {
     try {
@@ -8,16 +8,17 @@ const authMiddleware = async (req, res, next) => {
         if (!token) {
             return res.status(401).json({ message: 'Not authenticated' });
         }
+        const checkDustbin = await Dustbin.findOne({ token: token })
+        if (checkDustbin) {
+            console.log(checkDustbin)
+            return res.status(401).json({ message: 'Not authenticated' });
+        }
 
         // Verify the token and decode the payload
         const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
-
+        console.log("decoded", decodedToken)
         // Check if the user with the ID in the payload exists in the database
-        const user = await User.findById(decodedToken.userId);
-        if (!user) {
-            return res.status(401).json({ message: 'Not authenticated' });
-        }
-        req.user = user;
+        req.user = decodedToken.userId;
         next();
     } catch (err) {
         if (err.message === 'Token expired') {
@@ -37,8 +38,8 @@ const authMiddleware = async (req, res, next) => {
                     httpOnly: true,
                     maxAge: 15 * 60 * 1000,
                 });
+                req.user = decodedRefreshToken.userId
                 req.session.token = token;
-
                 // Call the next middleware function
                 next();
             } catch (err) {

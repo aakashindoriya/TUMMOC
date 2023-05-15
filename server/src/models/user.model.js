@@ -12,6 +12,10 @@ const userSchema = new mongoose.Schema({
         required: true,
         unique: true
     },
+    city: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'City',
+    },
     password: {
         type: String,
         default: "this cant be used for login"

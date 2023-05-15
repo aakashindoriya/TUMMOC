@@ -1,6 +1,8 @@
 const User = require("../models/user.model")
 const jwt = require("jsonwebtoken")
-const argon2 = require("argon2")
+const argon2 = require("argon2");
+const Dustbin = require("../models/dustbin.model");
+const City = require("../models/city.model");
 
 
 const SIGNUP = async (req, res) => {
@@ -74,15 +76,34 @@ const LOGIN = async (req, res) => {
     }
 }
 
-const LOGOUT = (req, res) => {
-    req.session.destroy((err) => {
-        if (err) {
-            console.log(err);
-            return res.status(500).json({ error: 'Internal server error' });
-        }
-        res.clearCookie('refreshToken');
-        res.clearCookie('token');
-        res.status(200).json({ message: 'Logged out successfully' });
-    });
+const LOGOUT = async (req, res) => {
+    try {
+
+        await Dustbin.create({ token: req.session.token })
+        await Dustbin.create({ token: req.session.refreshToken })
+        req.session.destroy((err) => {
+            if (err) {
+                console.log(err);
+                return res.status(500).json({ error: 'Internal server error' });
+            }
+            res.clearCookie('refreshToken');
+            res.clearCookie('token');
+            res.status(200).json({ message: 'Logged out successfully' });
+        });
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
 };
-module.exports = { SIGNUP, LOGIN, LOGOUT }
+
+const USERDATA = async (req, res) => {
+    try {
+        const cities = await City.aggregate([
+            { $lookup: { from: "users", localField: "_id", foreignField: "city", as: "users" } }
+        ])
+
+        res.status(200).json(cities);
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+}
+module.exports = { SIGNUP, LOGIN, LOGOUT, USERDATA }
