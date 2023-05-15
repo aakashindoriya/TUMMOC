@@ -12,7 +12,7 @@ app.get('/auth/google',
     passport.authenticate('google', { scope: ['profile', "email"] }));
 
 app.get('/auth/google/callback',
-    passport.authenticate('google', { failureRedirect: '/login', session: false }),
+    passport.authenticate('google', { failureRedirect: '/login' }),
     function (req, res) {
         const user = req.user[0]
         req.session.userId = user._id;

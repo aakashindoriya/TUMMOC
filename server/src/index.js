@@ -4,6 +4,8 @@ const cors = require("cors")
 const Connect = require("./config/db.connect")
 const session = require('express-session');
 const cookieParser = require('cookie-parser');
+const passport = require('passport');
+
 const app = express()
 const userRoute = require("./routes/user.route")
 const cityRoute = require("./routes/city.route")
@@ -26,7 +28,8 @@ app.use(session({
         secure: false,
     },
 }));
-
+app.use(passport.initialize());
+app.use(passport.session());
 
 app.get("/", (req, res) => res.send("welcome to TUMMOC"))
 app.get("/info", (req, res) => {
