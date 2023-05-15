@@ -6,7 +6,7 @@ const app = express.Router()
 
 app.post("/signup", SIGNUP)
 app.post("/login", LOGIN)
-app.post("/logout", LOGOUT)
+app.delete("/logout", LOGOUT)
 app.get('/auth/google',
     passport.authenticate('google', { scope: ['profile', "email"] }));
 
@@ -30,7 +30,7 @@ app.get('/auth/google/callback',
         });
 
         // Successful authentication, redirect home.
-        res.redirect(`${process.env.BASEURL}/google/${token}`);
+        res.redirect(`${process.env.BASEURL}/`);
     })
 
 

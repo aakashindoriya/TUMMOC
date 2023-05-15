@@ -16,8 +16,7 @@ passport.use(new GoogleStrategy({
 
             return cb(null, user)
         } catch (error) {
-            console.log(error)
-            return cb(error);
+            return cb(error.message);
         }
         // User.create({ username: profile.displayName, email: profile._json.email }, function (err, user) {
         //     return cb(err, user);

@@ -3,20 +3,17 @@ import {
     AUTH_LOGIN_REQUEST,
     AUTH_LOGIN_SUCCESS,
     AUTH_LOGOUT,
+    AUTH_TRUE,
 } from "../actionTypes/auth.action.type";
 
 const initialState = {
     isAuth: false,
     isLoading: false,
-    username: "",
-    id: "",
-    email: "",
     token: ""
 
 };
-let savedstate = JSON.parse(localStorage.getItem("auth")) || initialState
 
-export default function authReducer(state = savedstate, { type, payload }) {
+export default function authReducer(state = initialState, { type, payload }) {
     switch (type) {
         case AUTH_LOGIN_REQUEST:
             return { ...state, isLoading: true };
@@ -26,12 +23,8 @@ export default function authReducer(state = savedstate, { type, payload }) {
                 isAuth: true,
                 isError: false,
                 isLoading: false,
-                username: payload.username,
-                id: payload.id,
-                email: payload.email,
                 token: payload.token
             }
-            localStorage.setItem("auth", JSON.stringify(obj1))
             return obj1;
         case AUTH_LOGIN_FAILURE:
             return {
@@ -39,8 +32,13 @@ export default function authReducer(state = savedstate, { type, payload }) {
                 isAuth: false,
                 isLoading: false
             };
+        case AUTH_TRUE: return {
+            ...state,
+            isAuth: payload.token ? true : false,
+            isLoading: false,
+            token: payload.token ? payload.token : ""
+        }
         case AUTH_LOGOUT:
-            localStorage.removeItem("auth")
             return initialState;
         default:
             return state;
