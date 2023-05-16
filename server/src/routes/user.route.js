@@ -14,7 +14,9 @@ app.get('/auth/google',
 app.get('/auth/google/callback',
     passport.authenticate('google', { failureRedirect: '/login' }),
     function (req, res) {
-        const user = req.user[0]
+
+        const user = req.user
+        console.log(user, "in")
         req.session.userId = user._id;
 
         const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '15m' });
