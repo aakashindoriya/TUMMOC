@@ -12,7 +12,7 @@ const cityRoute = require("./routes/city.route")
 app.use(cors(
 
     {
-        origin:'https://tummoc-aakashindoriya.vercel.app',
+        origin:['http://localhost:3000', 'https://tummoc-aakashindoriya.vercel.app'],
         credentials: true,
     }
 ))
