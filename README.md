@@ -1,5 +1,6 @@
 # TUMMOC
-
+## Note :- 
+          setting up cookies in deployed link is not working at this moment please clone the project and test it locally 😊
 ## Deployed Backend URL: [https://tummoc-production.up.railway.app/](https://tummoc-production.up.railway.app/)
 
 ## Deployed Frontend URL: [https://tummoc-aakashindoriya.vercel.app/](https://tummoc-aakashindoriya.vercel.app/)
